@@ -1,0 +1,19 @@
+[submodule "external/spdlog"]
+	path = external/spdlog
+	url = https://github.com/gabime/spdlog.git
+	branch = v1.x
+	
+[submodule "external/catch2"]
+	path = external/catch2
+	url = https://github.com/catchorg/Catch2.git
+	branch = v2.x
+	
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb.git
+	branch = master
+	
+[submodule "external/jsoncpp"]
+	path = external/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git
+	branch = master
