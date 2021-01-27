@@ -4,7 +4,7 @@
 #include "StringUtility.h"
 
 ///< 각 나라 언어에 맞는 wide string을 utf8로 변환
-std::string gaia3d::StringUtility::convertWideStringToUtf8(const std::wstring& wstr)
+std::string gaia3d::StringUtility::convertWideStringToUtf8(const std::wstring &wstr)
 {
 #ifdef WIN32
 	static std::locale loc("");
@@ -17,7 +17,7 @@ std::string gaia3d::StringUtility::convertWideStringToUtf8(const std::wstring& w
 #endif
 }
 
-std::wstring gaia3d::StringUtility::convertUtf8ToWideString(const std::string& str)
+std::wstring gaia3d::StringUtility::convertUtf8ToWideString(const std::string &str)
 {
 #ifdef WIN32
 	static std::locale loc("");

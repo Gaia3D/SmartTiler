@@ -27,7 +27,7 @@ LogWriter::~LogWriter()
 }
 
 ///< Set full path where log is to be written
-void LogWriter::setFullPath(std::string& path)
+void LogWriter::setFullPath(std::string &path)
 {
 	fullPath = path;
 }
@@ -37,7 +37,7 @@ void LogWriter::save()
 {
 	Json::StyledWriter writer;
 	std::string documentContent = writer.write(logObject);
-	FILE* file = NULL;
+	FILE *file = NULL;
 	file = fopen(fullPath.c_str(), "wt");
 
 	if (file == NULL)
@@ -67,7 +67,6 @@ void LogWriter::setStatus(bool bSuccess, std::string message)
 		else
 			logObject["log"] = logObject["log"].asString() + std::string(" | ") + message;
 	}
-
 }
 
 void LogWriter::addMessageToLog(std::string content)
@@ -218,8 +217,7 @@ void LogWriter::setAdditionalInfoToJop(std::string key, std::vector<T> values)
 		return;
 
 	T tester = values[0];
-	f(dynamic_cast<double>(&tester) == NULL)
-		return;
+	f(dynamic_cast<double>(&tester) == NULL) return;
 
 	if (dynamic_cast<bool>(&tester) == NULL)
 		return;

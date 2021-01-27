@@ -15,7 +15,7 @@ public:
 	TilingProcessor();
 	virtual ~TilingProcessor();
 
-	static TilingProcessor* getProcessor() { return &tilingProcessor; }
+	static TilingProcessor *getProcessor() { return &tilingProcessor; }
 
 	bool initialize(std::map<std::string, std::string> arguments);
 
@@ -41,76 +41,66 @@ private:
 
 	void makeSmartTileIndex(std::string targetFolder);
 
-	bool loadGeolocationInfo
-	(
-		std::string& path,
-		std::map<unsigned int, std::string>& dataKeys,
-		std::map<unsigned int, std::string>& dataNames,
-		std::map<unsigned int, std::string>& layerIds,
-		std::map<unsigned int, unsigned int>& dataGroupIds,
-		std::map<unsigned int, double>& longitudes,
-		std::map<unsigned int, double>& latitudes,
-		std::map<unsigned int, double>& heights,
-		std::map<unsigned int, double>& headings,
-		std::map<unsigned int, double>& pitches,
-		std::map<unsigned int, double>& rolls,
-		std::map<unsigned int, Json::Value>& attributes,
-		std::string defaultLayerId
-	);
+	bool loadGeolocationInfo(
+		std::string &path,
+		std::map<unsigned int, std::string> &dataKeys,
+		std::map<unsigned int, std::string> &dataNames,
+		std::map<unsigned int, std::string> &layerIds,
+		std::map<unsigned int, unsigned int> &dataGroupIds,
+		std::map<unsigned int, double> &longitudes,
+		std::map<unsigned int, double> &latitudes,
+		std::map<unsigned int, double> &heights,
+		std::map<unsigned int, double> &headings,
+		std::map<unsigned int, double> &pitches,
+		std::map<unsigned int, double> &rolls,
+		std::map<unsigned int, Json::Value> &attributes,
+		std::string defaultLayerId);
 
-	void collectCandidatesToBeTiled(std::string inputFolder, std::map<std::string, std::string>& targets);
+	void collectCandidatesToBeTiled(std::string inputFolder, std::map<std::string, std::string> &targets);
 
-	void crossCheckBetweenGeolocationInfoAndCandidates
-	(
-		std::map<unsigned int, std::string>& geolocationInfo,
-		std::map<std::string, std::string>& candidates,
-		std::map<unsigned int, std::string>& finalGeolocationInfo,
-		std::map<std::string, std::string>& finalTargets
-	);
+	void crossCheckBetweenGeolocationInfoAndCandidates(
+		std::map<unsigned int, std::string> &geolocationInfo,
+		std::map<std::string, std::string> &candidates,
+		std::map<unsigned int, std::string> &finalGeolocationInfo,
+		std::map<std::string, std::string> &finalTargets);
 
-	void matchTargetsToTileDepthAndIndices
-	(
-		std::map<unsigned int, std::string>& dataKeys,
-		std::map<std::string, std::string>& dataToBeTiled,
-		std::map<unsigned int, double>& longitudes,
-		std::map<unsigned int, double>& latitudes,
-		std::map<unsigned int, double>& heights,
-		std::map<unsigned int, double>& headings,
-		std::map<unsigned int, double>& pitches,
-		std::map<unsigned int, double>& rolls,
-		std::map<unsigned int, unsigned int>& depths,
-		std::map<unsigned int, unsigned int>& xIndices,
-		std::map<unsigned int, unsigned int>& yIndices
-	);
+	void matchTargetsToTileDepthAndIndices(
+		std::map<unsigned int, std::string> &dataKeys,
+		std::map<std::string, std::string> &dataToBeTiled,
+		std::map<unsigned int, double> &longitudes,
+		std::map<unsigned int, double> &latitudes,
+		std::map<unsigned int, double> &heights,
+		std::map<unsigned int, double> &headings,
+		std::map<unsigned int, double> &pitches,
+		std::map<unsigned int, double> &rolls,
+		std::map<unsigned int, unsigned int> &depths,
+		std::map<unsigned int, unsigned int> &xIndices,
+		std::map<unsigned int, unsigned int> &yIndices);
 
-	void findTileIndicesAtGivenDepth
-	(
+	void findTileIndicesAtGivenDepth(
 		unsigned int depth,
 		double longitude,
 		double latitude,
-		unsigned int& xIndex,
-		unsigned int& yIndex
-	);
+		unsigned int &xIndex,
+		unsigned int &yIndex);
 
-	bool makeSmartTiles
-	(
+	bool makeSmartTiles(
 		std::string outputFolder,
-		std::map<unsigned int, std::string>& dataKeys,
-		std::map<unsigned int, std::string>& dataNames,
-		std::map<unsigned int, unsigned int>& dataGroupIds,
-		std::map<unsigned int, std::string>& layerIds,
-		std::map<unsigned int, double>& longitudes,
-		std::map<unsigned int, double>& latitudes,
-		std::map<unsigned int, double>& heights,
-		std::map<unsigned int, double>& headings,
-		std::map<unsigned int, double>& pitches,
-		std::map<unsigned int, double>& rolls,
-		std::map<unsigned int, Json::Value>& attributes,
-		std::map<std::string, std::string>& dataToBeTiled,
-		std::map<unsigned int, unsigned int>& depths,
-		std::map<unsigned int, unsigned int>& xIndices,
-		std::map<unsigned int, unsigned int>& yIndices
-	);
+		std::map<unsigned int, std::string> &dataKeys,
+		std::map<unsigned int, std::string> &dataNames,
+		std::map<unsigned int, unsigned int> &dataGroupIds,
+		std::map<unsigned int, std::string> &layerIds,
+		std::map<unsigned int, double> &longitudes,
+		std::map<unsigned int, double> &latitudes,
+		std::map<unsigned int, double> &heights,
+		std::map<unsigned int, double> &headings,
+		std::map<unsigned int, double> &pitches,
+		std::map<unsigned int, double> &rolls,
+		std::map<unsigned int, Json::Value> &attributes,
+		std::map<std::string, std::string> &dataToBeTiled,
+		std::map<unsigned int, unsigned int> &depths,
+		std::map<unsigned int, unsigned int> &xIndices,
+		std::map<unsigned int, unsigned int> &yIndices);
 };
 
 #endif // _TILINGPROCESSOR_H_

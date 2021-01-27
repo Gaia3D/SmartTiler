@@ -9,9 +9,9 @@
 #include <sys/uio.h>
 #elif defined WIN32
 #include <direct.h>
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#define mkdir(dirname,mode)   _mkdir(dirname)
+#define S_ISREG(m) (((m)&S_IFMT) == S_IFREG)
+#define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
+#define mkdir(dirname, mode) _mkdir(dirname)
 #else
 #include <sys/io.h>
 #endif
@@ -33,7 +33,6 @@ TilingProcessor::TilingProcessor()
 
 	bCreateSmartTileIndexFile = false;
 }
-
 
 TilingProcessor::~TilingProcessor()
 {
@@ -68,7 +67,7 @@ bool TilingProcessor::initialize(std::map<std::string, std::string> arguments)
 	if (arguments.find(OutputFolder) != arguments.end())
 	{
 		outputPath = arguments[OutputFolder];
-		
+
 		bool outputFolderExist = false;
 		if (stat(outputPath.c_str(), &status) == 0)
 		{
@@ -127,7 +126,7 @@ void TilingProcessor::process()
 		makeSmartTileIndex(outputPath);
 }
 
-void scanSmartTiles(std::string targetFolder, std::map<std::string, std::vector<unsigned int>>& info)
+void scanSmartTiles(std::string targetFolder, std::map<std::string, std::vector<unsigned int>> &info)
 {
 	namespace fs = std::filesystem;
 
@@ -159,7 +158,7 @@ void scanSmartTiles(std::string targetFolder, std::map<std::string, std::vector<
 					std::vector<std::string> splittedWords;
 					memset(stringBuffer, 0x00, 1024);
 					memcpy(stringBuffer, dataFile.c_str(), dataFile.size());
-					char* token = std::strtok(stringBuffer, "_.");
+					char *token = std::strtok(stringBuffer, "_.");
 					while (token != NULL)
 					{
 						splittedWords.push_back(std::string(token));
@@ -177,7 +176,7 @@ void scanSmartTiles(std::string targetFolder, std::map<std::string, std::vector<
 
 				std::cout << "[file]" << dataFile << std::endl;
 			}
-			catch (const std::exception& ex)
+			catch (const std::exception &ex)
 			{
 				std::cout << "scanSmartTiles" << ex.what() << std::endl;
 			}
@@ -194,14 +193,14 @@ void TilingProcessor::makeSmartTileIndex(std::string targetFolder)
 		return;
 
 	std::string indexFileFullPath = targetFolder + std::string("/smartTile_f4d_indexFile.sii");
-	FILE* file = NULL;
+	FILE *file = NULL;
 	file = fopen(indexFileFullPath.c_str(), "wb");
 	if (file == NULL)
 	{
 		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::makeSmartTileIndex : ") + std::string(CANNOT_OPEN_FILE));
 		return;
 	}
-	
+
 	unsigned int tileInfoCount = (unsigned int)tileInfo.size();
 	fwrite(&tileInfoCount, sizeof(unsigned int), 1, file);
 
@@ -240,11 +239,11 @@ void TilingProcessor::processSmartTileCreation()
 	///< scan all candidates to be tiled
 	std::map<std::string, std::string> candidatesToBeTiled;
 	collectCandidatesToBeTiled(inputDataPath, candidatesToBeTiled);
-	
+
 	if (candidatesToBeTiled.empty())
 	{
 		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::processSmartTileCreation : ") + std::string(NO_INPUT_DATA));
-		return ;
+		return;
 	}
 
 	///< extract cross-section between geolocation info and candidates to confirm targets to be tiled
@@ -253,7 +252,7 @@ void TilingProcessor::processSmartTileCreation()
 	crossCheckBetweenGeolocationInfoAndCandidates(dataKeys, candidatesToBeTiled, finalDataKeys, dataToBeTiled);
 
 	///< match each input data to be tiled into depth and x/y indices of tiles
-	std::map<unsigned int, unsigned int> depths, xIndices, yIndices;	
+	std::map<unsigned int, unsigned int> depths, xIndices, yIndices;
 	matchTargetsToTileDepthAndIndices(
 		finalDataKeys,
 		dataToBeTiled,
@@ -281,25 +280,23 @@ void TilingProcessor::processSmartTileCreation()
 		yIndices);
 }
 
-bool TilingProcessor::makeSmartTiles
-(
+bool TilingProcessor::makeSmartTiles(
 	std::string outputFolder,
-	std::map<unsigned int, std::string>& dataKeys,
-	std::map<unsigned int, std::string>& dataNames,
-	std::map<unsigned int, unsigned int>& dataGroupIds,
-	std::map<unsigned int, std::string>& layerIds,
-	std::map<unsigned int, double>& longitudes,
-	std::map<unsigned int, double>& latitudes,
-	std::map<unsigned int, double>& heights,
-	std::map<unsigned int, double>& headings,
-	std::map<unsigned int, double>& pitches,
-	std::map<unsigned int, double>& rolls,
-	std::map<unsigned int, Json::Value>& attributes,
-	std::map<std::string, std::string>& dataToBeTiled,
-	std::map<unsigned int, unsigned int>& depths,
-	std::map<unsigned int, unsigned int>& xIndices,
-	std::map<unsigned int, unsigned int>& yIndices
-)
+	std::map<unsigned int, std::string> &dataKeys,
+	std::map<unsigned int, std::string> &dataNames,
+	std::map<unsigned int, unsigned int> &dataGroupIds,
+	std::map<unsigned int, std::string> &layerIds,
+	std::map<unsigned int, double> &longitudes,
+	std::map<unsigned int, double> &latitudes,
+	std::map<unsigned int, double> &heights,
+	std::map<unsigned int, double> &headings,
+	std::map<unsigned int, double> &pitches,
+	std::map<unsigned int, double> &rolls,
+	std::map<unsigned int, Json::Value> &attributes,
+	std::map<std::string, std::string> &dataToBeTiled,
+	std::map<unsigned int, unsigned int> &depths,
+	std::map<unsigned int, unsigned int> &xIndices,
+	std::map<unsigned int, unsigned int> &yIndices)
 {
 	struct stat status;
 
@@ -359,7 +356,7 @@ bool TilingProcessor::makeSmartTiles
 	}
 
 	///< check if tiles to be made already exist
-	///< if so, load previous tile file to add or overwrite data into this tile 
+	///< if so, load previous tile file to add or overwrite data into this tile
 	///< if not, make a new tile
 	std::map<std::string, std::vector<unsigned int>>::iterator dataGroupIter = dataGroupedByTile.begin();
 	for (; dataGroupIter != dataGroupedByTile.end(); dataGroupIter++)
@@ -370,11 +367,13 @@ bool TilingProcessor::makeSmartTiles
 			tile.tileLod = lod;
 			std::string tileFullPath;
 			if (lod == 5)
+			{
 				tileFullPath = tileFullPaths[dataGroupIter->first] + std::string(".sti");
+			}
 			else
+			{
 				tileFullPath = tileFullPath = tileFullPaths[dataGroupIter->first] + std::string("_") + std::to_string((unsigned int)lod) + std::string(".sti");
-
-			LogWriter::getLogWriter()->createNewJobLog(std::string("create a new tile"), tileFullPath);
+			}
 
 			// load tile file if exist
 			tile.readTile(tileFullPath);
@@ -399,21 +398,21 @@ bool TilingProcessor::makeSmartTiles
 
 				double longitude = longitudes[dataId], latitude = latitudes[dataId], height = heights[dataId];
 				double heading = headings[dataId], pitch = pitches[dataId], roll = rolls[dataId];
-	
+
 				if (!tile.addData(
-					dataPath,
-					dataId,
-					dataGroupId,
-					layerId,
-					dataKey,
-					dataName,
-					longitude,
-					latitude,
-					(float)height,
-					pitch,
-					roll,
-					heading,
-					attributes[dataId]))
+						dataPath,
+						dataId,
+						dataGroupId,
+						layerId,
+						dataKey,
+						dataName,
+						longitude,
+						latitude,
+						(float)height,
+						pitch,
+						roll,
+						heading,
+						attributes[dataId]))
 				{
 					LogWriter::getLogWriter()->changeCurrentJobStatus(LogWriter::JOB_STATUS::warning);
 					LogWriter::getLogWriter()->addDescriptionToCurrentJobLog(std::string("failed to add data into tile(") + dataPath + std::string(")"));
@@ -442,20 +441,18 @@ bool TilingProcessor::makeSmartTiles
 	return true;
 }
 
-void TilingProcessor::matchTargetsToTileDepthAndIndices
-(
-	std::map<unsigned int, std::string>& dataKeys,
-	std::map<std::string, std::string>& dataToBeTiled,
-	std::map<unsigned int, double>& longitudes,
-	std::map<unsigned int, double>& latitudes,
-	std::map<unsigned int, double>& heights,
-	std::map<unsigned int, double>& headings,
-	std::map<unsigned int, double>& pitches,
-	std::map<unsigned int, double>& rolls,
-	std::map<unsigned int, unsigned int>& depths,
-	std::map<unsigned int, unsigned int>& xIndices,
-	std::map<unsigned int, unsigned int>& yIndices
-)
+void TilingProcessor::matchTargetsToTileDepthAndIndices(
+	std::map<unsigned int, std::string> &dataKeys,
+	std::map<std::string, std::string> &dataToBeTiled,
+	std::map<unsigned int, double> &longitudes,
+	std::map<unsigned int, double> &latitudes,
+	std::map<unsigned int, double> &heights,
+	std::map<unsigned int, double> &headings,
+	std::map<unsigned int, double> &pitches,
+	std::map<unsigned int, double> &rolls,
+	std::map<unsigned int, unsigned int> &depths,
+	std::map<unsigned int, unsigned int> &xIndices,
+	std::map<unsigned int, unsigned int> &yIndices)
 {
 	std::map<unsigned int, std::string>::iterator keyIter = dataKeys.begin();
 	for (; keyIter != dataKeys.end(); keyIter++)
@@ -468,14 +465,11 @@ void TilingProcessor::matchTargetsToTileDepthAndIndices
 
 		///< access to and read .hed file to get bbox info
 		std::string metaFile = dataFullPath + std::string("/") + std::string(MetaFileName);
-		FILE* file = NULL;
+		FILE *file = NULL;
 		file = fopen(metaFile.c_str(), "rb");
 		if (file == NULL)
 		{
-			LogWriter::getLogWriter()->addMessageToLog(std::string(WARNING_FLAG) 
-														+ std::string("TilingProcessor::matchTargetsToTileDepthAndIndices : ") 
-														+ std::string(CANNOT_OPEN_FILE) 
-														+ metaFile);
+			LogWriter::getLogWriter()->addMessageToLog(std::string(WARNING_FLAG) + std::string("TilingProcessor::matchTargetsToTileDepthAndIndices : ") + std::string(CANNOT_OPEN_FILE) + metaFile);
 			continue;
 		}
 
@@ -485,12 +479,12 @@ void TilingProcessor::matchTargetsToTileDepthAndIndices
 		float dummyFloat;
 		memset(dummyBuffer, 0x00, 64);
 		fread(dummyBuffer, sizeof(char), 5, file); // version
-		fread(&dummyInt, sizeof(int), 1, file); // guid length
+		fread(&dummyInt, sizeof(int), 1, file);	   // guid length
 		memset(dummyBuffer, 0x00, 64);
 		fread(dummyBuffer, sizeof(char), dummyInt, file); // guid
-		fread(&dummyDouble, sizeof(double), 1, file); // longitude
-		fread(&dummyDouble, sizeof(double), 1, file); // latitude
-		fread(&dummyFloat, sizeof(float), 1, file); // height
+		fread(&dummyDouble, sizeof(double), 1, file);	  // longitude
+		fread(&dummyDouble, sizeof(double), 1, file);	  // latitude
+		fread(&dummyFloat, sizeof(float), 1, file);		  // height
 
 		float minX, minY, minZ, maxX, maxY, maxZ, xLength, yLength, zLength;
 		fread(&minX, sizeof(float), 1, file);
@@ -521,14 +515,12 @@ void TilingProcessor::matchTargetsToTileDepthAndIndices
 	}
 }
 
-void TilingProcessor::findTileIndicesAtGivenDepth
-(
+void TilingProcessor::findTileIndicesAtGivenDepth(
 	unsigned int depth,
 	double longitude,
 	double latitude,
-	unsigned int& xIndex,
-	unsigned int& yIndex
-)
+	unsigned int &xIndex,
+	unsigned int &yIndex)
 {
 	///< applied only WGS84 tile schema at this version
 	if (longitude >= 180.0)
@@ -580,13 +572,11 @@ void TilingProcessor::findTileIndicesAtGivenDepth
 	}
 }
 
-void TilingProcessor::crossCheckBetweenGeolocationInfoAndCandidates
-(
-	std::map<unsigned int, std::string>& geolocationInfo,
-	std::map<std::string, std::string>& candidates,
-	std::map<unsigned int, std::string>& finalGeolocationInfo,
-	std::map<std::string, std::string>& finalTargets
-)
+void TilingProcessor::crossCheckBetweenGeolocationInfoAndCandidates(
+	std::map<unsigned int, std::string> &geolocationInfo,
+	std::map<std::string, std::string> &candidates,
+	std::map<unsigned int, std::string> &finalGeolocationInfo,
+	std::map<std::string, std::string> &finalTargets)
 {
 	std::map<unsigned int, std::string>::iterator itr = geolocationInfo.begin();
 	for (; itr != geolocationInfo.end(); itr++)
@@ -608,22 +598,20 @@ void TilingProcessor::crossCheckBetweenGeolocationInfoAndCandidates
 	}
 }
 
-bool TilingProcessor::loadGeolocationInfo
-(
-	std::string& path,
-	std::map<unsigned int, std::string>& dataKeys,
-	std::map<unsigned int, std::string>& dataNames,
-	std::map<unsigned int, std::string>& layerIds,
-	std::map<unsigned int, unsigned int>& dataGroupIds,
-	std::map<unsigned int, double>& longitudes,
-	std::map<unsigned int, double>& latitudes,
-	std::map<unsigned int, double>& heights,
-	std::map<unsigned int, double>& headings,
-	std::map<unsigned int, double>& pitches,
-	std::map<unsigned int, double>& rolls,
-	std::map<unsigned int, Json::Value>& attributes,
-	std::string defaultLayerId
-)
+bool TilingProcessor::loadGeolocationInfo(
+	std::string &path,
+	std::map<unsigned int, std::string> &dataKeys,
+	std::map<unsigned int, std::string> &dataNames,
+	std::map<unsigned int, std::string> &layerIds,
+	std::map<unsigned int, unsigned int> &dataGroupIds,
+	std::map<unsigned int, double> &longitudes,
+	std::map<unsigned int, double> &latitudes,
+	std::map<unsigned int, double> &heights,
+	std::map<unsigned int, double> &headings,
+	std::map<unsigned int, double> &pitches,
+	std::map<unsigned int, double> &rolls,
+	std::map<unsigned int, Json::Value> &attributes,
+	std::string defaultLayerId)
 {
 	std::vector<std::string> geolocationFiles;
 
@@ -653,13 +641,14 @@ bool TilingProcessor::loadGeolocationInfo
 					}
 				}
 			}
-			catch (const std::exception& ex)
+			catch (const std::exception &ex)
 			{
 				std::cout << it->path().filename() << " " << ex.what() << std::endl;
 			}
 		}
 	}
-	else {
+	else
+	{
 		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::loadGeolocationInfo : ") + std::string(NO_GEOLOCATION_FILE));
 		return false;
 	}
@@ -669,12 +658,12 @@ bool TilingProcessor::loadGeolocationInfo
 		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::loadGeolocationInfo : ") + std::string(NO_GEOLOCATION_FILE));
 		return false;
 	}
-		
+
 	///< read all geolocation files
 	for (size_t i = 0; i < geolocationFiles.size(); i++)
 	{
 		std::string contents;
-		FILE* file = NULL;
+		FILE *file = NULL;
 		file = fopen(geolocationFiles[i].c_str(), "rt");
 
 		if (file == NULL)
@@ -791,7 +780,7 @@ bool TilingProcessor::loadGeolocationInfo
 	return true;
 }
 
-void TilingProcessor::collectCandidatesToBeTiled(std::string targetFolder, std::map<std::string, std::string>& info)
+void TilingProcessor::collectCandidatesToBeTiled(std::string targetFolder, std::map<std::string, std::string> &info)
 {
 	namespace fs = std::filesystem;
 
@@ -817,7 +806,7 @@ void TilingProcessor::collectCandidatesToBeTiled(std::string targetFolder, std::
 				info[subFolder] = subFolderPath.string();
 				std::cout << "[directory]" << subFolderPath << std::endl;
 			}
-			catch (const std::exception& ex)
+			catch (const std::exception &ex)
 			{
 				std::cout << subFolder << " " << ex.what() << std::endl;
 			}

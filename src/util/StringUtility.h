@@ -16,9 +16,9 @@ namespace gaia3d
 	class StringUtility
 	{
 	public:
-		static std::string convertWideStringToUtf8(const std::wstring& sourceString);
-		static std::wstring convertUtf8ToWideString(const std::string& sourceString);
+		static std::string convertWideStringToUtf8(const std::wstring &sourceString);
+		static std::wstring convertUtf8ToWideString(const std::string &sourceString);
 	};
-}
+} // namespace gaia3d
 
 #endif // _STRINGUTILITY_H_

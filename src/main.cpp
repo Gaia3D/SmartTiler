@@ -6,7 +6,7 @@
 #include "util/LogWriter.h"
 #include "tiler/TilingProcessor.h"
 
-bool extractArguments(int argc, char** argv, std::map<std::string, std::string>& arguments)
+bool extractArguments(int argc, char **argv, std::map<std::string, std::string> &arguments)
 {
 	std::vector<std::string> tokens;
 
@@ -121,7 +121,7 @@ bool extractArguments(int argc, char** argv, std::map<std::string, std::string>&
 	return true;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	///< basic argument validation
 	if (argc < 2)

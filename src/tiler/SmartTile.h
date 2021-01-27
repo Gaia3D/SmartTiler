@@ -35,10 +35,9 @@ public:
 		double pitch,
 		double roll,
 		double heading,
-		Json::Value& attribute);
+		Json::Value &attribute);
 
 public:
-
 	unsigned char tileLod;
 
 	std::vector<unsigned int> dataIds;
@@ -47,12 +46,12 @@ public:
 	std::vector<std::string> buildingIds;
 	std::vector<std::string> dataNames;
 	std::vector<unsigned int> metaDataSizes;
-	std::vector<unsigned char*> metaData;
+	std::vector<unsigned char *> metaData;
 	std::vector<std::string> lodMeshNames;
 	std::vector<unsigned int> meshDataSizes;
-	std::vector<unsigned char*> meshData;
+	std::vector<unsigned char *> meshData;
 	std::vector<unsigned int> imageDataSizes;
-	std::vector<unsigned char*> imageData;
+	std::vector<unsigned char *> imageData;
 	std::vector<double> longitudes;
 	std::vector<double> latitudes;
 	std::vector<float> altitudes;

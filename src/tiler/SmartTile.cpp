@@ -8,7 +8,6 @@
 
 SmartTile::SmartTile()
 {
-
 }
 
 SmartTile::~SmartTile()
@@ -25,7 +24,7 @@ SmartTile::~SmartTile()
 
 bool SmartTile::readTile(std::string tilePath)
 {
-	FILE* file = NULL;
+	FILE *file = NULL;
 	file = fopen(tilePath.c_str(), "rb");
 	if (file == NULL)
 		return false;
@@ -45,7 +44,8 @@ bool SmartTile::readTile(std::string tilePath)
 		unsigned short layerIdLength;
 		fread(&layerIdLength, sizeof(unsigned short), 1, file);
 
-		if (layerIdLength != 0) {
+		if (layerIdLength != 0)
+		{
 			// layer(project) id
 			memset(stringBuffer, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringBuffer, sizeof(char), layerIdLength, file);
@@ -54,7 +54,8 @@ bool SmartTile::readTile(std::string tilePath)
 		// building id length
 		unsigned short buildingIdLength;
 		fread(&buildingIdLength, sizeof(unsigned short), 1, file);
-		if (buildingIdLength != 0) {
+		if (buildingIdLength != 0)
+		{
 			// building id
 			memset(stringBuffer, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringBuffer, sizeof(char), buildingIdLength, file);
@@ -66,7 +67,7 @@ bool SmartTile::readTile(std::string tilePath)
 		metaDataSizes.push_back(metaDataSize);
 
 		// metadata
-		unsigned char* metaDataBuffer = new unsigned char[metaDataSize];
+		unsigned char *metaDataBuffer = new unsigned char[metaDataSize];
 		memset(metaDataBuffer, 0x00, sizeof(unsigned char) * metaDataSize);
 		fread(metaDataBuffer, sizeof(unsigned char), metaDataSize, file);
 		metaData.push_back(metaDataBuffer);
@@ -78,7 +79,8 @@ bool SmartTile::readTile(std::string tilePath)
 		// lod name length
 		unsigned short lodMeshNameLength;
 		fread(&lodMeshNameLength, sizeof(unsigned short), 1, file);
-		if (lodMeshNameLength != 0) {
+		if (lodMeshNameLength != 0)
+		{
 			// lod name
 			memset(stringBuffer, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringBuffer, sizeof(char), lodMeshNameLength, file);
@@ -90,7 +92,7 @@ bool SmartTile::readTile(std::string tilePath)
 		meshDataSizes.push_back(meshDataSize);
 
 		// mesh data
-		unsigned char* meshDataBuffer = new unsigned char[meshDataSize];
+		unsigned char *meshDataBuffer = new unsigned char[meshDataSize];
 		memset(meshDataBuffer, 0x00, sizeof(unsigned char) * meshDataSize);
 		fread(meshDataBuffer, sizeof(unsigned char), meshDataSize, file);
 		meshData.push_back(meshDataBuffer);
@@ -99,9 +101,10 @@ bool SmartTile::readTile(std::string tilePath)
 		unsigned int imageDataSize;
 		fread(&imageDataSize, sizeof(unsigned int), 1, file);
 		imageDataSizes.push_back(imageDataSize);
-		if (imageDataSize > 0) {
+		if (imageDataSize > 0)
+		{
 			// image data
-			unsigned char* imageDataBuffer = new unsigned char[imageDataSize];
+			unsigned char *imageDataBuffer = new unsigned char[imageDataSize];
 			memset(imageDataBuffer, 0x00, sizeof(unsigned char) * imageDataSize);
 			fread(imageDataBuffer, sizeof(unsigned char), imageDataSize, file);
 			imageData.push_back(imageDataBuffer);
@@ -250,7 +253,7 @@ bool SmartTile::readTile(std::string tilePath)
 
 bool SmartTile::writeTile(std::string tilePath)
 {
-	FILE* file = NULL;
+	FILE *file = NULL;
 	file = fopen(tilePath.c_str(), "wb");
 	if (file == NULL)
 		return false;
@@ -265,12 +268,12 @@ bool SmartTile::writeTile(std::string tilePath)
 	{
 		unsigned short layerIdLength = (unsigned short)layerIds[i].size();
 		fwrite(&layerIdLength, sizeof(unsigned short), 1, file);
-		if(layerIdLength != 0)
+		if (layerIdLength != 0)
 			fwrite(layerIds[i].c_str(), sizeof(char), layerIdLength, file);
 
 		unsigned short buildingIdLength = (unsigned short)buildingIds[i].size();
 		fwrite(&buildingIdLength, sizeof(unsigned short), 1, file);
-		if(buildingIdLength != 0)
+		if (buildingIdLength != 0)
 			fwrite(buildingIds[i].c_str(), sizeof(char), buildingIdLength, file);
 
 		unsigned int metaDataSize = metaDataSizes[i];
@@ -281,7 +284,7 @@ bool SmartTile::writeTile(std::string tilePath)
 
 		unsigned short lodMeshNameLength = (unsigned short)lodMeshNames[i].size();
 		fwrite(&lodMeshNameLength, sizeof(unsigned short), 1, file);
-		if(lodMeshNameLength != 0)
+		if (lodMeshNameLength != 0)
 			fwrite(lodMeshNames[i].c_str(), sizeof(char), lodMeshNameLength, file);
 
 		unsigned int meshDataSize = meshDataSizes[i];
@@ -290,7 +293,7 @@ bool SmartTile::writeTile(std::string tilePath)
 
 		unsigned int imageDataSize = imageDataSizes[i];
 		fwrite(&imageDataSize, sizeof(unsigned int), 1, file);
-		if(imageDataSize > 0)
+		if (imageDataSize > 0)
 			fwrite(imageData[i], sizeof(unsigned char), imageDataSize, file);
 
 		double longitude = longitudes[i];
@@ -382,7 +385,6 @@ bool SmartTile::writeTile(std::string tilePath)
 
 		endMark = 0;
 		fwrite(&endMark, sizeof(char), 1, file);
-
 	}
 
 	fclose(file);
@@ -390,7 +392,7 @@ bool SmartTile::writeTile(std::string tilePath)
 	return true;
 }
 
-void readOctreeByDummy(FILE* f)
+void readOctreeByDummy(FILE *f)
 {
 	int dummyInt;
 	fread(&dummyInt, sizeof(int), 1, f);
@@ -432,7 +434,7 @@ bool SmartTile::addData(
 	double pitch,
 	double roll,
 	double heading,
-	Json::Value& attribute)
+	Json::Value &attribute)
 {
 	// check if already-existing data before processing
 	size_t alreadyExistingDataMarker;
@@ -450,7 +452,7 @@ bool SmartTile::addData(
 	// header file
 	//// meta data block
 	std::string metaDataFullPath = dataPath + std::string("/HeaderAsimetric.hed");
-	FILE* file = NULL;
+	FILE *file = NULL;
 	file = fopen(metaDataFullPath.c_str(), "rb");
 	if (file == NULL)
 	{
@@ -461,8 +463,8 @@ bool SmartTile::addData(
 	unsigned int metaFileSize = (unsigned int)((unsigned long)ftell(file));
 	rewind(file);
 
-	unsigned char* metaDataBuffer = new unsigned char[metaFileSize];
-	memset(metaDataBuffer, 0x00, sizeof(unsigned char)*metaFileSize);
+	unsigned char *metaDataBuffer = new unsigned char[metaFileSize];
+	memset(metaDataBuffer, 0x00, sizeof(unsigned char) * metaFileSize);
 
 	fread(metaDataBuffer, sizeof(unsigned char), metaFileSize, file);
 
@@ -552,14 +554,14 @@ bool SmartTile::addData(
 			char stringArray[StringBufferSize];
 
 			fread(&stringLength, sizeof(unsigned char), 1, file);
-			memset(stringArray, 0x00, sizeof(char)*StringBufferSize);
+			memset(stringArray, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringArray, sizeof(char), stringLength, file);
 
-			if(lod == tileLod)
+			if (lod == tileLod)
 				lodMeshName = std::string(stringArray);
 
 			fread(&stringLength, sizeof(unsigned char), 1, file);
-			memset(stringArray, 0x00, sizeof(char)*StringBufferSize);
+			memset(stringArray, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringArray, sizeof(char), stringLength, file);
 
 			if (lod == tileLod)
@@ -588,8 +590,8 @@ bool SmartTile::addData(
 	unsigned int meshFileSize = (unsigned int)((unsigned long)ftell(file));
 	rewind(file);
 
-	unsigned char* meshDataBuffer = new unsigned char[meshFileSize];
-	memset(meshDataBuffer, 0x00, sizeof(unsigned char)*meshFileSize);
+	unsigned char *meshDataBuffer = new unsigned char[meshFileSize];
+	memset(meshDataBuffer, 0x00, sizeof(unsigned char) * meshFileSize);
 	fread(meshDataBuffer, sizeof(unsigned char), meshFileSize, file);
 	fclose(file);
 
@@ -609,11 +611,10 @@ bool SmartTile::addData(
 	unsigned int textureFileSize = (unsigned int)((unsigned long)ftell(file));
 	rewind(file);
 
-	unsigned char* textureDataBuffer = new unsigned char[textureFileSize];
-	memset(textureDataBuffer, 0x00, sizeof(unsigned char)*textureFileSize);
+	unsigned char *textureDataBuffer = new unsigned char[textureFileSize];
+	memset(textureDataBuffer, 0x00, sizeof(unsigned char) * textureFileSize);
 	fread(textureDataBuffer, sizeof(unsigned char), textureFileSize, file);
 	fclose(file);
-
 
 	// final push
 	if (bAlreadyExist)
