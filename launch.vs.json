@@ -1,0 +1,42 @@
+﻿{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "name": "SmartTiler.exe (Windows for Debug)",
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "SmartTiler.exe (SmartTiler\\Debug\\SmartTiler.exe)",
+      "args": [
+        "-inputFolder",
+        "C:/DATA/conversionData/test",
+        "-outputFolder",
+        "C:/DATA/conversionResult",
+        "-log",
+        "C:/DATA/conversionResult/logTest.txt",
+        "-geolocationPath",
+        "C:/DATA/conversionData",
+        "-dataGroupKey",
+        "test"
+      ]
+    },
+    {
+      "name": "SmartTiler.exe (Windows for Release)",
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "SmartTiler.exe (SmartTiler\\RelWithDebInfo\\SmartTiler.exe)",
+      "args": [
+        "-inputFolder",
+        "C:/DATA/conversionData/test",
+        "-outputFolder",
+        "C:/DATA/conversionResult",
+        "-log",
+        "C:/DATA/conversionResult/logTest.txt",
+        "-geolocationPath",
+        "C:/DATA/conversionData",
+        "-dataGroupKey",
+        "test"
+      ]
+    }
+  ]
+}
