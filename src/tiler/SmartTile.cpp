@@ -156,7 +156,14 @@ bool SmartTile::readTile(std::string tilePath)
 			fread(&dataNameLength, sizeof(unsigned short), 1, file);
 			memset(stringBuffer, 0x00, sizeof(char) * StringBufferSize);
 			fread(stringBuffer, sizeof(char), dataNameLength, file);
-			dataNames.push_back(std::string(stringBuffer));
+
+			if (!std::string(stringBuffer).compare("data_name"))
+			{
+				fread(&dataNameLength, sizeof(unsigned short), 1, file);
+				memset(stringBuffer, 0x00, sizeof(char) * StringBufferSize);
+				fread(stringBuffer, sizeof(char), dataNameLength, file);
+				dataNames.push_back(std::string(stringBuffer));
+			}
 		}
 
 		// attribute
