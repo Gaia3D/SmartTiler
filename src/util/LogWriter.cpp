@@ -3,6 +3,7 @@
  */
 #include "LogWriter.h"
 
+#include <filesystem>
 #include <fstream>
 #include <chrono>
 #include <ctime>
@@ -26,10 +27,52 @@ LogWriter::~LogWriter()
 {
 }
 
-///< Set full path where log is to be written
-void LogWriter::setFullPath(std::string &path)
+///< Set full path of the logfile
+void LogWriter::setFullPath(std::string& path)
 {
-	fullPath = path;
+	namespace fs = std::filesystem;
+	fs::path fullPath(path);
+	fullPath = fullPath.lexically_normal();
+
+	if (fs::is_directory(fullPath))
+	{
+		logFilePath = fullPath.string();
+		logFileName = "";
+	}
+	else
+	{
+		logFilePath = fullPath.parent_path().string();
+		logFileName = fullPath.filename().string();
+	}
+}
+
+///< Set path where log is to be written
+void LogWriter::setPath(std::string &path)
+{
+	logFilePath = path;
+}
+
+///< Set log file name
+void LogWriter::setFileName(std::string& name)
+{
+	logFileName = name;
+}
+
+///< Set log file name
+void LogWriter::setFileNameByPrefix(std::string &name)
+{
+	logFileName = logFileNamePrefix + name + std::string(".txt");
+}
+
+///< Set log file name prefix
+void LogWriter::setFileNamePrefix(std::string &prefix)
+{
+	logFileNamePrefix = prefix;
+}
+
+bool LogWriter::isEmptyFileName()
+{
+	return logFileName.empty();
 }
 
 ///< save the result log
@@ -38,6 +81,12 @@ void LogWriter::save()
 	Json::StyledWriter writer;
 	std::string documentContent = writer.write(logObject);
 	FILE *file = NULL;
+	if (logFileName.empty())
+	{
+		logFileName = "log_smartTile.txt";
+	}
+
+	std::string fullPath = logFilePath + std::string("/") + logFileName;
 	file = fopen(fullPath.c_str(), "wt");
 
 	if (file == NULL)
@@ -115,8 +164,6 @@ std::string LogWriter::getCurrentTimeString()
 	std::strftime(timeStringLine, 256, "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
 
 	std::string timeString(timeStringLine);
-	/*if (timeString.find_last_of(std::string("\n")) != std::string::npos)
-		timeString = timeString.substr(0, timeString.find_last_of(std::string("\n")));*/
 
 	return timeString;
 }
@@ -132,6 +179,8 @@ void LogWriter::createNewJobLog(std::string jobName, std::string fullPath)
 	currentJob["startTime"] = getCurrentTimeString();
 	currentJob["resultStatus"] = std::string("success");
 	currentJob["message"] = std::string("");
+
+	numberOfJobsToBeDone++;
 
 	isJobGoing = true;
 }
@@ -176,6 +225,10 @@ void LogWriter::closeCurrentJobLog()
 
 	currentJob["endTime"] = getCurrentTimeString();
 	logObject["jobResult"].append(currentJob);
+
+	if (currentJob["resultStatus"] != std::string("failure"))
+		numberOfJobsDone++;
+
 	currentJob.clear();
 
 	isJobGoing = false;
@@ -217,7 +270,8 @@ void LogWriter::setAdditionalInfoToJop(std::string key, std::vector<T> values)
 		return;
 
 	T tester = values[0];
-	f(dynamic_cast<double>(&tester) == NULL) return;
+	if (dynamic_cast<double>(&tester) == NULL)
+		return;
 
 	if (dynamic_cast<bool>(&tester) == NULL)
 		return;
