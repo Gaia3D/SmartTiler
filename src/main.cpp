@@ -2,6 +2,8 @@
 #define APIENTRY __stdcall
 #endif
 
+#include <filesystem>
+
 #include "argdefinition.h"
 #include "util/LogWriter.h"
 #include "tiler/TilingProcessor.h"
@@ -118,6 +120,12 @@ bool extractArguments(int argc, char **argv, std::map<std::string, std::string> 
 		}
 	}
 
+	if (arguments.find(LogFilePath) == arguments.end())
+	{
+		printf("[ERROR][Invalid Arguments] -log MUST be entered.\n");
+		return false;
+	}
+
 	return true;
 }
 
@@ -149,8 +157,19 @@ int main(int argc, char *argv[])
 	///< start log writer if needed
 	if (arguments.find(LogFilePath) != arguments.end())
 	{
+		namespace fs = std::filesystem;
+
+		std::string logFile = arguments[LogFilePath];
+		
+		if (!fs::exists(fs::path(logFile)))
+		{
+			printf("[Error]The Path for log file does NOT exist.\n");
+			return -3;
+		}
+
 		LogWriter::getLogWriter()->start();
-		LogWriter::getLogWriter()->setFullPath(arguments[LogFilePath]);
+		LogWriter::getLogWriter()->setFullPath(logFile);
+		LogWriter::getLogWriter()->setFileNamePrefix(std::string("log_smartTile_"));
 	}
 
 	///< process
