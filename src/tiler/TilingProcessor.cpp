@@ -42,25 +42,70 @@ bool TilingProcessor::initialize(std::map<std::string, std::string> arguments)
 {
 	struct stat status;
 
-	///< test if input folder exist
-	if (arguments.find(InputFolder) != arguments.end())
+	///< test if input json file exists
+	if (arguments.find(InputFile) != arguments.end())
 	{
-		inputDataPath = arguments[InputFolder];
+		inputDataFile = arguments[InputFile];
 
-		bool inputFolderExist = false;
-		if (stat(inputDataPath.c_str(), &status) == 0)
-		{
-			if (S_ISDIR(status.st_mode))
-				inputFolderExist = true;
-		}
+		FILE* file = NULL;
+		file = fopen(inputDataFile.c_str(), "rt");
 
-		if (!inputFolderExist)
+		if (file == NULL)
 		{
-			LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(NO_PATH) + inputDataPath);
+			LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(CANNOT_OPEN_FILE) + inputDataFile);
 			return false;
 		}
 
+		fclose(file);
+
 		bCreateSmartTile = true;
+	}
+	else
+	{
+		///< test if input folder exist
+		if (arguments.find(InputFolder) != arguments.end())
+		{
+			inputDataPath = arguments[InputFolder];
+
+			bool inputFolderExist = false;
+			if (stat(inputDataPath.c_str(), &status) == 0)
+			{
+				if (S_ISDIR(status.st_mode))
+					inputFolderExist = true;
+			}
+
+			if (!inputFolderExist)
+			{
+				LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(NO_PATH) + inputDataPath);
+				return false;
+			}
+
+			bCreateSmartTile = true;
+		}
+
+		///< test if geolocation file exist
+		if (arguments.find(GeolocationPath) != arguments.end())
+		{
+			geolocationPath = arguments[GeolocationPath];
+
+			bool geolocaitonFolderExist = false;
+			if (stat(geolocationPath.c_str(), &status) == 0)
+			{
+				if (S_ISDIR(status.st_mode))
+					geolocaitonFolderExist = true;
+			}
+
+			if (!geolocaitonFolderExist)
+			{
+				LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(NO_PATH) + geolocationPath);
+				return false;
+			}
+		}
+
+		if (arguments.find(DataGroupKey) != arguments.end())
+		{
+			dataGroupKey = arguments[DataGroupKey];
+		}
 	}
 
 	///< test if output folder exist
@@ -80,30 +125,6 @@ bool TilingProcessor::initialize(std::map<std::string, std::string> arguments)
 			LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(NO_PATH) + outputPath);
 			return false;
 		}
-	}
-
-	///< test if geolocation file exist
-	if (arguments.find(GeolocationPath) != arguments.end())
-	{
-		geolocationPath = arguments[GeolocationPath];
-
-		bool geolocaitonFolderExist = false;
-		if (stat(geolocationPath.c_str(), &status) == 0)
-		{
-			if (S_ISDIR(status.st_mode))
-				geolocaitonFolderExist = true;
-		}
-
-		if (!geolocaitonFolderExist)
-		{
-			LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::initialize : ") + std::string(NO_PATH) + geolocationPath);
-			return false;
-		}
-	}
-
-	if (arguments.find(DataGroupKey) != arguments.end())
-	{
-		dataGroupKey = arguments[DataGroupKey];
 	}
 
 	if (arguments.find(CreateIndex) != arguments.end())
@@ -228,75 +249,41 @@ void TilingProcessor::makeSmartTileIndex(std::string targetFolder)
 
 void TilingProcessor::processSmartTileCreation()
 {
-	///< read geolocation info
-	std::map<unsigned int, std::string> dataNames, dataKeys, layerIds;
-	std::map<unsigned int, unsigned int> dataGroupIds;
-	std::map<unsigned int, double> longitudes, latitudes, heights, headings, pitches, rolls;
-	std::map<unsigned int, Json::Value> attributes;
-	if (!loadGeolocationInfo(geolocationPath, dataKeys, dataNames, layerIds, dataGroupIds, longitudes, latitudes, heights, headings, pitches, rolls, attributes, dataGroupKey))
-		return;
+	std::map<unsigned int, Json::Value> inputDataInfo;
 
-	///< scan all candidates to be tiled
-	std::map<std::string, std::string> candidatesToBeTiled;
-	collectCandidatesToBeTiled(inputDataPath, candidatesToBeTiled);
-
-	if (candidatesToBeTiled.empty())
+	if (inputDataFile.empty())
 	{
-		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::processSmartTileCreation : ") + std::string(NO_INPUT_DATA));
-		return;
+		if (!makeInputDataInfo(inputDataPath, inputDataInfo))
+		{
+			return;
+		}
 	}
-
-	///< extract cross-section between geolocation info and candidates to confirm targets to be tiled
-	std::map<unsigned int, std::string> finalDataKeys;
-	std::map<std::string, std::string> dataToBeTiled;
-	crossCheckBetweenGeolocationInfoAndCandidates(dataKeys, candidatesToBeTiled, finalDataKeys, dataToBeTiled);
+	else
+	{
+		if (!loadInputDataInfo(inputDataFile, inputDataInfo))
+		{
+			return;
+		}
+	}
 
 	///< match each input data to be tiled into depth and x/y indices of tiles
 	std::map<unsigned int, unsigned int> depths, xIndices, yIndices;
-	matchTargetsToTileDepthAndIndices(
-		finalDataKeys,
-		dataToBeTiled,
-		longitudes, latitudes, heights,
-		headings, pitches, rolls,
-		depths, xIndices, yIndices);
+	matchTargetsToTileDepthAndIndices(inputDataInfo, depths, xIndices, yIndices);
+	if (depths.empty() || xIndices.empty() || yIndices.empty())
+	{
+		return;
+	}
 
 	///< make smart tiles
-	makeSmartTiles(
-		outputPath,
-		finalDataKeys,
-		dataNames,
-		dataGroupIds,
-		layerIds,
-		longitudes,
-		latitudes,
-		heights,
-		headings,
-		pitches,
-		rolls,
-		attributes,
-		dataToBeTiled,
-		depths,
-		xIndices,
-		yIndices);
+	makeSmartTiles(outputPath, inputDataInfo, depths, xIndices, yIndices);
 }
 
 bool TilingProcessor::makeSmartTiles(
 	std::string outputFolder,
-	std::map<unsigned int, std::string> &dataKeys,
-	std::map<unsigned int, std::string> &dataNames,
-	std::map<unsigned int, unsigned int> &dataGroupIds,
-	std::map<unsigned int, std::string> &layerIds,
-	std::map<unsigned int, double> &longitudes,
-	std::map<unsigned int, double> &latitudes,
-	std::map<unsigned int, double> &heights,
-	std::map<unsigned int, double> &headings,
-	std::map<unsigned int, double> &pitches,
-	std::map<unsigned int, double> &rolls,
-	std::map<unsigned int, Json::Value> &attributes,
-	std::map<std::string, std::string> &dataToBeTiled,
-	std::map<unsigned int, unsigned int> &depths,
-	std::map<unsigned int, unsigned int> &xIndices,
-	std::map<unsigned int, unsigned int> &yIndices)
+	std::map<unsigned int, Json::Value>& targets,
+	std::map<unsigned int, unsigned int>& depths,
+	std::map<unsigned int, unsigned int>& xIndices,
+	std::map<unsigned int, unsigned int>& yIndices)
 {
 	struct stat status;
 
@@ -324,7 +311,7 @@ bool TilingProcessor::makeSmartTiles(
 		{
 			if (mkdir(depthFolder.c_str(), 0755) != 0)
 			{
-				LogWriter::getLogWriter()->setStatus(false, std::string("TilingProcessor::makeSmartTiles : ") + std::string(CANNOT_CREATE_DIRECTORY));
+				LogWriter::getLogWriter()->setStatus(false, std::string("TilingProcessor::makeSmartTiles : ") + std::string(CANNOT_CREATE_DIRECTORY) + depthFolder);
 				return false;
 			}
 		}
@@ -341,7 +328,7 @@ bool TilingProcessor::makeSmartTiles(
 		{
 			if (mkdir(xIndexFolder.c_str(), 0755) != 0)
 			{
-				LogWriter::getLogWriter()->setStatus(false, std::string("TilingProcessor::makeSmartTiles : ") + std::string(CANNOT_CREATE_DIRECTORY));
+				LogWriter::getLogWriter()->setStatus(false, std::string("TilingProcessor::makeSmartTiles : ") + std::string(CANNOT_CREATE_DIRECTORY) + xIndexFolder);
 				return false;
 			}
 		}
@@ -390,29 +377,29 @@ bool TilingProcessor::makeSmartTiles(
 			for (size_t i = 0; i < dataGroupIter->second.size(); i++)
 			{
 				unsigned int dataId = (dataGroupIter->second)[i];
-				unsigned int dataGroupId = dataGroupIds[dataId];
-				std::string layerId = layerIds[dataId];
-				std::string dataKey = dataKeys[dataId];
-				std::string dataName = dataNames[dataId];
-				std::string dataPath = dataToBeTiled[std::string(BasicDataPrefix) + dataKey];
+				unsigned int dataGroupId = targets[dataId]["dataGroupId"].asUInt();
+				std::string layerId = targets[dataId]["dataGroupKey"].asString();
+				std::string dataKey = targets[dataId]["dataKey"].asString();
+				std::string dataName = targets[dataId]["dataName"].asString();
+				std::string dataPath = targets[dataId]["dataGroupPath"].asString() + std::string("/") + std::string(BasicDataPrefix) + dataKey;
 
-				double longitude = longitudes[dataId], latitude = latitudes[dataId], height = heights[dataId];
-				double heading = headings[dataId], pitch = pitches[dataId], roll = rolls[dataId];
+				double longitude = targets[dataId]["longitude"].asDouble(), latitude = targets[dataId]["latitude"].asDouble(), height = targets[dataId]["altitude"].asDouble();
+				double heading = targets[dataId]["heading"].asDouble(), pitch = targets[dataId]["pitch"].asDouble(), roll = targets[dataId]["roll"].asDouble();
 
 				if (!tile.addData(
-						dataPath,
-						dataId,
-						dataGroupId,
-						layerId,
-						dataKey,
-						dataName,
-						longitude,
-						latitude,
-						(float)height,
-						pitch,
-						roll,
-						heading,
-						attributes[dataId]))
+					dataPath,
+					dataId,
+					dataGroupId,
+					layerId,
+					dataKey,
+					dataName,
+					longitude,
+					latitude,
+					(float)height,
+					pitch,
+					roll,
+					heading,
+					targets[dataId]["attributes"]))
 				{
 					LogWriter::getLogWriter()->changeCurrentJobStatus(LogWriter::JOB_STATUS::warning);
 					LogWriter::getLogWriter()->addDescriptionToCurrentJobLog(std::string("failed to add data into tile(") + dataPath + std::string(")"));
@@ -441,31 +428,29 @@ bool TilingProcessor::makeSmartTiles(
 	return true;
 }
 
-void TilingProcessor::matchTargetsToTileDepthAndIndices(
-	std::map<unsigned int, std::string> &dataKeys,
-	std::map<std::string, std::string> &dataToBeTiled,
-	std::map<unsigned int, double> &longitudes,
-	std::map<unsigned int, double> &latitudes,
-	std::map<unsigned int, double> &heights,
-	std::map<unsigned int, double> &headings,
-	std::map<unsigned int, double> &pitches,
-	std::map<unsigned int, double> &rolls,
-	std::map<unsigned int, unsigned int> &depths,
-	std::map<unsigned int, unsigned int> &xIndices,
-	std::map<unsigned int, unsigned int> &yIndices)
+void TilingProcessor::matchTargetsToTileDepthAndIndices
+(
+	std::map<unsigned int, Json::Value>& targets,
+	std::map<unsigned int, unsigned int>& depths,
+	std::map<unsigned int, unsigned int>& xIndices,
+	std::map<unsigned int, unsigned int>& yIndices
+)
 {
-	std::map<unsigned int, std::string>::iterator keyIter = dataKeys.begin();
-	for (; keyIter != dataKeys.end(); keyIter++)
+	std::map<unsigned int, Json::Value>::iterator iter = targets.begin();
+	Json::Value defaultValue(Json::nullValue);
+	for (; iter != targets.end(); iter++)
 	{
-		unsigned int dataId = keyIter->first;
-		std::string dataKey = keyIter->second;
+		Json::Value dataInfo = iter->second;
+
+		unsigned int dataId = dataInfo["dataId"].asUInt();
+		std::string dataKey = dataInfo["dataKey"].asString();
 
 		std::string dataFolderName = std::string(BasicDataPrefix) + dataKey;
-		std::string dataFullPath = dataToBeTiled[dataFolderName];
+		std::string dataFullPath = dataInfo["dataGroupPath"].asString() + std::string("/") + dataFolderName;
 
 		///< access to and read .hed file to get bbox info
 		std::string metaFile = dataFullPath + std::string("/") + std::string(MetaFileName);
-		FILE *file = NULL;
+		FILE* file = NULL;
 		file = fopen(metaFile.c_str(), "rb");
 		if (file == NULL)
 		{
@@ -479,12 +464,12 @@ void TilingProcessor::matchTargetsToTileDepthAndIndices(
 		float dummyFloat;
 		memset(dummyBuffer, 0x00, 64);
 		fread(dummyBuffer, sizeof(char), 5, file); // version
-		fread(&dummyInt, sizeof(int), 1, file);	   // guid length
+		fread(&dummyInt, sizeof(int), 1, file); // guid length
 		memset(dummyBuffer, 0x00, 64);
 		fread(dummyBuffer, sizeof(char), dummyInt, file); // guid
-		fread(&dummyDouble, sizeof(double), 1, file);	  // longitude
-		fread(&dummyDouble, sizeof(double), 1, file);	  // latitude
-		fread(&dummyFloat, sizeof(float), 1, file);		  // height
+		fread(&dummyDouble, sizeof(double), 1, file); // longitude
+		fread(&dummyDouble, sizeof(double), 1, file); // latitude
+		fread(&dummyFloat, sizeof(float), 1, file); // height
 
 		float minX, minY, minZ, maxX, maxY, maxZ, xLength, yLength, zLength;
 		fread(&minX, sizeof(float), 1, file);
@@ -507,7 +492,7 @@ void TilingProcessor::matchTargetsToTileDepthAndIndices(
 				break;
 
 		unsigned int xIndex, yIndex;
-		findTileIndicesAtGivenDepth(depth, longitudes[dataId], latitudes[dataId], xIndex, yIndex);
+		findTileIndicesAtGivenDepth(depth, dataInfo["longitude"].asDouble(), dataInfo["latitude"].asDouble(), xIndex, yIndex);
 
 		depths[dataId] = depth;
 		xIndices[dataId] = xIndex;
@@ -697,7 +682,9 @@ bool TilingProcessor::loadGeolocationInfo(
 			layerId = dataGroupKey;
 		}
 		else
+		{
 			layerId = root["data_key"].asString();
+		}
 
 		Json::Value children = root["children"];
 		unsigned int childCount = children.size();
@@ -812,4 +799,235 @@ void TilingProcessor::collectCandidatesToBeTiled(std::string targetFolder, std::
 			}
 		}
 	}
+}
+
+bool TilingProcessor::loadInputDataInfo
+(
+	std::string& path,
+	std::map<unsigned int, Json::Value>& result
+)
+{
+	std::string contents;
+	FILE* file = NULL;
+	file = fopen(inputDataFile.c_str(), "rt");
+
+	if (file == NULL)
+	{
+		LogWriter::getLogWriter()->addMessageToLog(std::string(WARNING_FLAG) + std::string("TilingProcessor::loadInputDataInfo : ") + std::string(CANNOT_OPEN_FILE) + inputDataFile);
+		return false;
+	}
+
+	char stringBlock[4096];
+	while (!feof(file))
+	{
+		memset(stringBlock, 0x00, 4096);
+		fgets(stringBlock, 4096, file);
+
+		contents += std::string(stringBlock);
+	}
+	fclose(file);
+
+	Json::Reader reader;
+	Json::Value root(Json::objectValue);
+	if (!reader.parse(contents, root, false))
+	{
+		std::string lastError = reader.getFormatedErrorMessages();
+		LogWriter::getLogWriter()->addMessageToLog(
+			std::string(ERROR_FLAG) +
+			std::string("TilingProcessor::loadInputDataInfo : ") +
+			std::string(PARSING_ERROR) +
+			inputDataFile +
+			std::string("|") +
+			lastError);
+
+		return false;
+	}
+
+	if (!root.isMember("tileId"))
+	{
+		LogWriter::getLogWriter()->addMessageToLog(std::string(ERROR_FLAG) + std::string("TilingProcessor::loadInputDataInfo : ") + std::string(NO_INFO) + std::string("tileId"));
+		return false;
+	}
+
+	unsigned int tileId = root["tileId"].asUInt();
+	LogWriter::getLogWriter()->setFileName(std::to_string(tileId));
+
+	if (!root.isMember("tileDataGroupList"))
+	{
+		LogWriter::getLogWriter()->addMessageToLog(std::string(ERROR_FLAG) + std::string("TilingProcessor::loadInputDataInfo : ") + std::string(NO_INFO) + std::string("tileDataGroupList"));
+		return false;
+	}
+
+	unsigned int tileDataGroupCount = root["tileDataGroupList"].size();
+	if (tileDataGroupCount == 0)
+	{
+		LogWriter::getLogWriter()->addMessageToLog(std::string(ERROR_FLAG) + std::string("TilingProcessor::loadInputDataInfo : ") + std::string(NO_INFO) + std::string("tileDataGroupList"));
+		return false;
+	}
+
+	Json::Value defaultValue(Json::nullValue);
+	for (unsigned int i = 0; i < tileDataGroupCount; i++)
+	{
+		Json::Value dataGroup = root["tileDataGroupList"].get(i, defaultValue);
+
+		if (!dataGroup.isMember("dataGroupId"))
+			continue;
+		unsigned int dataGroupId = dataGroup["dataGroupId"].asUInt();
+
+		if (!dataGroup.isMember("dataGroupKey"))
+			continue;
+		std::string dataGroupKey = dataGroup["dataGroupKey"].asString();
+
+		if (!dataGroup.isMember("absoluteDataGroupPath"))
+			continue;
+		std::string dataGroupPath = dataGroup["absoluteDataGroupPath"].asString();
+		if (dataGroupPath.find_last_of('/') == dataGroupPath.length() - 1)
+			dataGroupPath = dataGroupPath.substr(0, dataGroupPath.length() - 1);
+		if (dataGroupPath.find_last_of('\\') == dataGroupPath.length() - 1)
+			dataGroupPath = dataGroupPath.substr(0, dataGroupPath.length() - 1);
+
+		if (!dataGroup.isMember("dataInfoList"))
+			continue;
+		unsigned int dataInfoCount = dataGroup["dataInfoList"].size();
+		if (dataInfoCount == 0)
+			continue;
+
+		for (unsigned int j = 0; j < dataInfoCount; j++)
+		{
+			Json::Value dataInfo = dataGroup["dataInfoList"].get(j, defaultValue);
+			Json::Value trimmedDataInfo(Json::objectValue);
+
+			if (!dataInfo.isMember("dataId"))
+				continue;
+			trimmedDataInfo["dataId"] = dataInfo["dataId"].asUInt();
+
+			if (!dataInfo.isMember("dataKey"))
+				continue;
+			trimmedDataInfo["dataKey"] = dataInfo["dataKey"].asString();
+
+			if (!dataInfo.isMember("dataName"))
+				continue;
+			trimmedDataInfo["dataName"] = dataInfo["dataName"].asString();
+
+			if (!dataInfo.isMember("longitude"))
+				continue;
+			trimmedDataInfo["longitude"] = dataInfo["longitude"].asDouble();
+
+			if (!dataInfo.isMember("latitude"))
+				continue;
+			trimmedDataInfo["latitude"] = dataInfo["latitude"].asDouble();
+
+			if (!dataInfo.isMember("altitude"))
+				continue;
+			trimmedDataInfo["altitude"] = dataInfo["altitude"].asDouble();
+
+			if (!dataInfo.isMember("heading"))
+				continue;
+			trimmedDataInfo["heading"] = dataInfo["heading"].asDouble();
+
+			if (!dataInfo.isMember("pitch"))
+				continue;
+			trimmedDataInfo["pitch"] = dataInfo["pitch"].asDouble();
+
+			if (!dataInfo.isMember("roll"))
+				continue;
+			trimmedDataInfo["roll"] = dataInfo["roll"].asDouble();
+
+			if (!dataInfo.isMember("metainfo"))
+				continue;
+			std::string attributeString = dataInfo["metainfo"].asString();
+
+			Json::Value attributeRoot(Json::objectValue);
+			if (!reader.parse(attributeString, attributeRoot, false))
+				continue;
+
+			Json::Value attributeNode(Json::objectValue);
+			if (attributeRoot.isMember("flipYTexCoords"))
+				attributeNode["flipYTexCoords"] = attributeRoot["flipYTexCoords"].asBool();
+			if (attributeRoot.isMember("heightReference"))
+			{
+				if (attributeRoot["heightReference"].asString() == std::string("clampToGround"))
+					attributeNode["heightReference"] = 1;
+				else if (attributeRoot["heightReference"].asString() == std::string("relativeToGround"))
+					attributeNode["heightReference"] = 2;
+				else
+					attributeNode["heightReference"] = 0;
+			}
+			trimmedDataInfo["attributes"] = attributeNode;
+
+			trimmedDataInfo["dataGroupId"] = dataGroupId;
+			trimmedDataInfo["dataGroupKey"] = dataGroupKey;
+			trimmedDataInfo["dataGroupPath"] = dataGroupPath;
+
+			result[trimmedDataInfo["dataId"].asUInt()] = trimmedDataInfo;
+		}
+	}
+
+	if (result.empty())
+	{
+		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::loadInputDataInfo : ") + std::string(NO_INFO));
+		return false;
+	}
+
+	return true;
+}
+
+bool TilingProcessor::makeInputDataInfo(std::string& path, std::map<unsigned int, Json::Value>& result)
+{
+	namespace fs = std::filesystem;
+
+	std::map<unsigned int, std::string> dataNames, dataKeys, layerIds;
+	std::map<unsigned int, unsigned int> dataGroupIds;
+	std::map<unsigned int, double> longitudes, latitudes, heights, headings, pitches, rolls;
+	std::map<unsigned int, Json::Value> attributes;
+	if (!loadGeolocationInfo(geolocationPath, dataKeys, dataNames, layerIds, dataGroupIds, longitudes, latitudes, heights, headings, pitches, rolls, attributes, dataGroupKey))
+	{
+		return false;
+	}
+
+	///< scan all candidates to be tiled
+	std::map<std::string, std::string> candidatesToBeTiled;
+	collectCandidatesToBeTiled(inputDataPath, candidatesToBeTiled);
+
+	if (candidatesToBeTiled.empty())
+	{
+		LogWriter::getLogWriter()->setStatus(false, std::string(ERROR_FLAG) + std::string("TilingProcessor::processSmartTileCreation : ") + std::string(NO_INPUT_DATA));
+		return false;
+	}
+
+	///< extract cross-section between geolocation info and candidates to confirm targets to be tiled
+	std::map<unsigned int, std::string> finalDataKeys;
+	std::map<std::string, std::string> dataToBeTiled;
+	crossCheckBetweenGeolocationInfoAndCandidates(dataKeys, candidatesToBeTiled, finalDataKeys, dataToBeTiled);
+
+
+	Json::Value trimmedDataInfo(Json::objectValue);
+	std::map<unsigned int, std::string>::iterator keyIter = finalDataKeys.begin();
+	for (; keyIter != finalDataKeys.end(); keyIter++)
+	{
+		unsigned int dataId = keyIter->first;
+		std::string dataKey = keyIter->second;
+
+		std::string dataFolderName = std::string(BasicDataPrefix) + dataKey;
+		std::string dataFullPath = dataToBeTiled[dataFolderName];
+		fs::path dataGroupPath(dataFullPath);
+		
+		trimmedDataInfo["dataId"] = dataId;
+		trimmedDataInfo["dataKey"] = dataKey;
+		trimmedDataInfo["dataName"] = dataNames[dataId];
+		trimmedDataInfo["longitude"] = longitudes[dataId];
+		trimmedDataInfo["latitude"] = latitudes[dataId];
+		trimmedDataInfo["altitude"] = heights[dataId];
+		trimmedDataInfo["heading"] = headings[dataId];
+		trimmedDataInfo["pitch"] = pitches[dataId];
+		trimmedDataInfo["roll"] = rolls[dataId];
+		trimmedDataInfo["attributes"] = attributes[dataId];
+		trimmedDataInfo["dataGroupId"] = dataGroupIds[dataId];
+		trimmedDataInfo["dataGroupKey"] = dataGroupKey;
+		trimmedDataInfo["dataGroupPath"] = dataGroupPath.parent_path().string();
+
+		result[trimmedDataInfo["dataId"].asUInt()] = trimmedDataInfo;
+	}
+
+	return true;
 }

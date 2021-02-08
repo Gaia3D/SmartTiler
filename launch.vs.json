@@ -9,15 +9,17 @@
       "projectTarget": "SmartTiler.exe (SmartTiler\\Debug\\SmartTiler.exe)",
       "args": [
         "-inputFolder",
-        "C:/DATA/conversionData/test",
+        "C:/DATA/conversionResult/test",
         "-outputFolder",
-        "C:/DATA/conversionResult",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
         "-geolocationPath",
-        "C:/DATA/conversionData",
+        "C:/DATA/conversionResult",
         "-dataGroupKey",
-        "test"
+        "test",
+        "-indexing",
+        "y"
       ]
     },
     {
@@ -27,15 +29,17 @@
       "projectTarget": "SmartTiler.exe (SmartTiler\\RelWithDebInfo\\SmartTiler.exe)",
       "args": [
         "-inputFolder",
-        "C:/DATA/conversionData/test",
+        "C:/DATA/conversionResult/test",
         "-outputFolder",
-        "C:/DATA/conversionResult",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
         "-geolocationPath",
-        "C:/DATA/conversionData",
+        "C:/DATA/conversionResult",
         "-dataGroupKey",
-        "test"
+        "test",
+        "-indexing",
+        "y"
       ]
     }
   ]

@@ -27,6 +27,13 @@ bool extractArguments(int argc, char **argv, std::map<std::string, std::string> 
 
 	for (size_t i = 0; i < tokenCount; i++)
 	{
+		if (tokens[i] == std::string(InputFile))
+		{
+			arguments[InputFile] = tokens[i + 1];
+			i++;
+			continue;
+		}
+
 		if (tokens[i] == std::string(InputFolder))
 		{
 			arguments[InputFolder] = tokens[i + 1];
@@ -76,31 +83,34 @@ bool extractArguments(int argc, char **argv, std::map<std::string, std::string> 
 		return false;
 	}
 
-	if (arguments.find(InputFolder) == arguments.end() && arguments.find(CreateIndex) == arguments.end())
+	if (arguments.find(InputFile) == arguments.end())
 	{
-		printf("[ERROR][Invalid Arguments] -inputFolder or -indexing or both MUST be entered.\n");
-		return false;
-	}
-
-	if (arguments.find(InputFolder) != arguments.end() && arguments.find(GeolocationPath) == arguments.end())
-	{
-		printf("[ERROR][Invalid Arguments] -geolocationPath MUST be entered when -inputFolder is used.\n");
-		return false;
-	}
-
-	if (arguments.find(InputFolder) != arguments.end())
-	{
-		if (arguments.find(DataGroupKey) == arguments.end())
+		if (arguments.find(InputFolder) == arguments.end() && arguments.find(CreateIndex) == arguments.end())
 		{
-			printf("[ERROR][Invalid Arguments] -dataGroupKey MUST be entered when -inputFolder is used.\n");
+			printf("[ERROR][Invalid Arguments] -inputFolder or -indexing or both MUST be entered.\n");
 			return false;
 		}
-		else
+
+		if (arguments.find(InputFolder) != arguments.end() && arguments.find(GeolocationPath) == arguments.end())
 		{
-			if (arguments[DataGroupKey].size() == 0)
+			printf("[ERROR][Invalid Arguments] -geolocationPath MUST be entered when -inputFolder is used.\n");
+			return false;
+		}
+
+		if (arguments.find(InputFolder) != arguments.end())
+		{
+			if (arguments.find(DataGroupKey) == arguments.end())
 			{
-				printf("[ERROR][Invalid Arguments] value of -dataGroupKey is zero.\n");
+				printf("[ERROR][Invalid Arguments] -dataGroupKey MUST be entered when -inputFolder is used.\n");
 				return false;
+			}
+			else
+			{
+				if (arguments[DataGroupKey].size() == 0)
+				{
+					printf("[ERROR][Invalid Arguments] value of -dataGroupKey is zero.\n");
+					return false;
+				}
 			}
 		}
 	}
