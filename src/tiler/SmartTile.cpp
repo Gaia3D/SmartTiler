@@ -3,6 +3,8 @@
 */
 #include "SmartTile.h"
 
+#include <cstring>
+
 ///< string buffer size for reading
 #define StringBufferSize 1024
 

@@ -28,7 +28,7 @@ LogWriter::~LogWriter()
 }
 
 ///< Set full path of the logfile
-void LogWriter::setFullPath(std::string& path)
+void LogWriter::setFullPath(std::string path)
 {
 	namespace fs = std::filesystem;
 	fs::path fullPath(path);
@@ -47,25 +47,25 @@ void LogWriter::setFullPath(std::string& path)
 }
 
 ///< Set path where log is to be written
-void LogWriter::setPath(std::string &path)
+void LogWriter::setPath(std::string path)
 {
 	logFilePath = path;
 }
 
 ///< Set log file name
-void LogWriter::setFileName(std::string& name)
+void LogWriter::setFileName(std::string name)
 {
 	logFileName = name;
 }
 
 ///< Set log file name
-void LogWriter::setFileNameByPrefix(std::string &name)
+void LogWriter::setFileNameByPrefix(std::string name)
 {
 	logFileName = logFileNamePrefix + name + std::string(".txt");
 }
 
 ///< Set log file name prefix
-void LogWriter::setFileNamePrefix(std::string &prefix)
+void LogWriter::setFileNamePrefix(std::string prefix)
 {
 	logFileNamePrefix = prefix;
 }

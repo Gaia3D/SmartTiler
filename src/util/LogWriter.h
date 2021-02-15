@@ -60,15 +60,15 @@ public:
 
 	static LogWriter *getLogWriter() { return &logWriter; }
 
-	void setFullPath(std::string& path);
+	void setFullPath(std::string path);
 
-	void setPath(std::string &path);
+	void setPath(std::string path);
 
-	void setFileName(std::string &name);
+	void setFileName(std::string name);
 
-	void setFileNameByPrefix(std::string& name);
+	void setFileNameByPrefix(std::string name);
 
-	void setFileNamePrefix(std::string &prefix);
+	void setFileNamePrefix(std::string prefix);
 
 	bool isEmptyFileName();
 

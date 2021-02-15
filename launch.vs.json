@@ -13,7 +13,7 @@
         "-outputFolder",
         "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-indexing",
         "y"
       ]
@@ -29,7 +29,7 @@
         "-outputFolder",
         "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-geolocationPath",
         "C:/DATA/conversionResult",
         "-dataGroupKey",
@@ -49,7 +49,7 @@
         "-outputFolder",
         "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-geolocationPath",
         "C:/DATA/conversionResult",
         "-dataGroupKey",
