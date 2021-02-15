@@ -7,6 +7,8 @@
 #include <fstream>
 #include <chrono>
 #include <ctime>
+#include <cstring>
+
 #include <json/json.h>
 
 LogWriter LogWriter::logWriter;
@@ -232,63 +234,4 @@ void LogWriter::closeCurrentJobLog()
 	currentJob.clear();
 
 	isJobGoing = false;
-}
-
-///< add any information to current job
-template <typename T>
-void LogWriter::setAdditionalInfoToJop(std::string key, T value)
-{
-	if (!isJobGoing)
-		return;
-
-	if (dynamic_cast<double>(&value) == NULL)
-		return;
-
-	if (dynamic_cast<bool>(&value) == NULL)
-		return;
-
-	if (dynamic_cast<std::string>(&value) == NULL)
-		return;
-
-	if (dynamic_cast<int>(&value) == NULL)
-		return;
-
-	if (dynamic_cast<unsigned int>(&value) == NULL)
-		return;
-
-	currentJob[key] = value;
-}
-
-///< add any information to current job
-template <typename T>
-void LogWriter::setAdditionalInfoToJop(std::string key, std::vector<T> values)
-{
-	if (!isJobGoing)
-		return;
-
-	if (values.empty())
-		return;
-
-	T tester = values[0];
-	if (dynamic_cast<double>(&tester) == NULL)
-		return;
-
-	if (dynamic_cast<bool>(&tester) == NULL)
-		return;
-
-	if (dynamic_cast<std::string>(&tester) == NULL)
-		return;
-
-	if (dynamic_cast<int>(&tester) == NULL)
-		return;
-
-	if (dynamic_cast<unsigned int>(&tester) == NULL)
-		return;
-
-	size_t valueCount = values.size();
-	Json::Value valueArray(Json::arrayValue);
-	for (size_t i = 0; i < valueCount; i++)
-		valueArray.append(values[i]);
-
-	currentJob[key] = valueArray;
 }

@@ -17,6 +17,7 @@
 #endif
 
 #include <filesystem>
+#include <cstring>
 
 #include <sys/stat.h>
 

@@ -80,12 +80,6 @@ public:
 
 	void closeCurrentJobLog();
 
-	template <typename T>
-	void setAdditionalInfoToJop(std::string key, T value);
-
-	template <typename T>
-	void setAdditionalInfoToJop(std::string key, std::vector<T> values);
-
 	void setStatus(bool bSuccess, std::string message = std::string());
 
 	void addMessageToLog(std::string content);
