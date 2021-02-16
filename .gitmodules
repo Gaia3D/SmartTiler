@@ -8,11 +8,6 @@
 	url = https://github.com/catchorg/Catch2.git
 	branch = v2.x
 	
-[submodule "external/stb"]
-	path = external/stb
-	url = https://github.com/nothings/stb.git
-	branch = master
-	
 [submodule "external/jsoncpp"]
 	path = external/jsoncpp
 	url = https://github.com/open-source-parsers/jsoncpp.git
