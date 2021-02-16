@@ -3,6 +3,8 @@
 */
 #include "SmartTile.h"
 
+#include <cstring>
+
 ///< string buffer size for reading
 #define StringBufferSize 1024
 
@@ -625,15 +627,29 @@ bool SmartTile::addData(
 		buildingIds[alreadyExistingDataMarker] = dataKey;
 		dataNames[alreadyExistingDataMarker] = dataName;
 		metaDataSizes[alreadyExistingDataMarker] = metaFileSize;
-		delete[] metaData[alreadyExistingDataMarker];
-		metaData[alreadyExistingDataMarker] = metaDataBuffer;
+
+		if (!metaData.empty())
+		{
+			delete[] metaData[alreadyExistingDataMarker];
+			metaData[alreadyExistingDataMarker] = metaDataBuffer;
+		}
+
 		lodMeshNames[alreadyExistingDataMarker] = lodMeshName;
 		meshDataSizes[alreadyExistingDataMarker] = meshFileSize;
-		delete[] meshData[alreadyExistingDataMarker];
-		meshData[alreadyExistingDataMarker] = meshDataBuffer;
+		
+		if (!meshData.empty())
+		{
+			delete[] meshData[alreadyExistingDataMarker];
+			meshData[alreadyExistingDataMarker] = meshDataBuffer;
+		}
+
 		imageDataSizes[alreadyExistingDataMarker] = textureFileSize;
-		delete[] imageData[alreadyExistingDataMarker];
-		imageData[alreadyExistingDataMarker] = textureDataBuffer;
+
+		if (!imageData.empty())
+		{
+			delete[] imageData[alreadyExistingDataMarker];
+			imageData[alreadyExistingDataMarker] = textureDataBuffer;
+		}
 		longitudes[alreadyExistingDataMarker] = longitude;
 		latitudes[alreadyExistingDataMarker] = latitude;
 		altitudes[alreadyExistingDataMarker] = altitude;

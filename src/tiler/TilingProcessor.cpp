@@ -17,6 +17,7 @@
 #endif
 
 #include <filesystem>
+#include <cstring>
 
 #include <sys/stat.h>
 
@@ -849,8 +850,11 @@ bool TilingProcessor::loadInputDataInfo
 		return false;
 	}
 
-	unsigned int tileId = root["tileId"].asUInt();
-	LogWriter::getLogWriter()->setFileName(std::to_string(tileId));
+	if (LogWriter::getLogWriter()->isEmptyFileName())
+	{
+		unsigned int tileId = root["tileId"].asUInt();
+		LogWriter::getLogWriter()->setFileNameByPrefix(std::to_string(tileId));
+	}
 
 	if (!root.isMember("tileDataGroupList"))
 	{

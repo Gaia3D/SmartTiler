@@ -60,15 +60,15 @@ public:
 
 	static LogWriter *getLogWriter() { return &logWriter; }
 
-	void setFullPath(std::string& path);
+	void setFullPath(std::string path);
 
-	void setPath(std::string &path);
+	void setPath(std::string path);
 
-	void setFileName(std::string &name);
+	void setFileName(std::string name);
 
-	void setFileNameByPrefix(std::string& name);
+	void setFileNameByPrefix(std::string name);
 
-	void setFileNamePrefix(std::string &prefix);
+	void setFileNamePrefix(std::string prefix);
 
 	bool isEmptyFileName();
 
@@ -79,12 +79,6 @@ public:
 	void addDescriptionToCurrentJobLog(std::string content);
 
 	void closeCurrentJobLog();
-
-	template <typename T>
-	void setAdditionalInfoToJop(std::string key, T value);
-
-	template <typename T>
-	void setAdditionalInfoToJop(std::string key, std::vector<T> values);
 
 	void setStatus(bool bSuccess, std::string message = std::string());
 

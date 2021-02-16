@@ -3,7 +3,23 @@
   "defaults": {},
   "configurations": [
     {
-      "name": "SmartTiler.exe (Windows for Debug)",
+      "name": "SmartTiler.exe (Windows for Debug) - JSON",
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "SmartTiler.exe (SmartTiler\\Debug\\SmartTiler.exe)",
+      "args": [
+        "-inputFile",
+        "C:/DATA/conversionResult/test.json",
+        "-outputFolder",
+        "C:/DATA/conversionResult/SmartTiles_Test",
+        "-log",
+        "C:/DATA/conversionResult/SmartTiles_Test",
+        "-indexing",
+        "y"
+      ]
+    },
+    {
+      "name": "SmartTiler.exe (Windows for Debug) - Folder",
       "type": "default",
       "project": "CMakeLists.txt",
       "projectTarget": "SmartTiler.exe (SmartTiler\\Debug\\SmartTiler.exe)",
@@ -13,7 +29,7 @@
         "-outputFolder",
         "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-geolocationPath",
         "C:/DATA/conversionResult",
         "-dataGroupKey",
@@ -33,7 +49,7 @@
         "-outputFolder",
         "C:/DATA/conversionResult/SmartTiles_Test",
         "-log",
-        "C:/DATA/conversionResult/SmartTiles_Test/logTest.txt",
+        "C:/DATA/conversionResult/SmartTiles_Test",
         "-geolocationPath",
         "C:/DATA/conversionResult",
         "-dataGroupKey",
