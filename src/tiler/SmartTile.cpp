@@ -599,24 +599,30 @@ bool SmartTile::addData(
 
 	// load texture data of matched lod mesh
 	//std::string textureFilePath = dataPath + std::string("/mosaicTextureLod") + std::to_string((unsigned int)tileLod) + std::string(".jpg");
-	std::string textureFilePath = dataPath + std::string("/") + lodTextureName;
-	file = NULL;
-	file = fopen(textureFilePath.c_str(), "rb");
-	if (file == NULL)
+	std::string textureFilePath;
+	unsigned int textureFileSize = 0;
+	unsigned char* textureDataBuffer = NULL;
+	if(lodTextureName.compare("noTexture") != 0)
 	{
-		delete[] metaDataBuffer;
-		delete[] meshDataBuffer;
-		return false;
+		textureFilePath = dataPath + std::string("/") + lodTextureName;
+		file = NULL;
+		file = fopen(textureFilePath.c_str(), "rb");
+		if (file == NULL)
+		{
+			delete[] metaDataBuffer;
+			delete[] meshDataBuffer;
+			return false;
+		}
+
+		fseek(file, 0, SEEK_END);
+		textureFileSize = (unsigned int)((unsigned long)ftell(file));
+		rewind(file);
+
+		textureDataBuffer = new unsigned char[textureFileSize];
+		memset(textureDataBuffer, 0x00, sizeof(unsigned char) * textureFileSize);
+		fread(textureDataBuffer, sizeof(unsigned char), textureFileSize, file);
+		fclose(file);
 	}
-
-	fseek(file, 0, SEEK_END);
-	unsigned int textureFileSize = (unsigned int)((unsigned long)ftell(file));
-	rewind(file);
-
-	unsigned char *textureDataBuffer = new unsigned char[textureFileSize];
-	memset(textureDataBuffer, 0x00, sizeof(unsigned char) * textureFileSize);
-	fread(textureDataBuffer, sizeof(unsigned char), textureFileSize, file);
-	fclose(file);
 
 	// final push
 	if (bAlreadyExist)
@@ -647,7 +653,8 @@ bool SmartTile::addData(
 
 		if (!imageData.empty())
 		{
-			delete[] imageData[alreadyExistingDataMarker];
+			if(imageData[alreadyExistingDataMarker] != NULL)
+				delete[] imageData[alreadyExistingDataMarker];
 			imageData[alreadyExistingDataMarker] = textureDataBuffer;
 		}
 		longitudes[alreadyExistingDataMarker] = longitude;
